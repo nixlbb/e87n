@@ -83,6 +83,19 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
+      - name: Force Enable SSH & Root Password in iStoreOS
+      
+        run: |
+          mkdir -p files/etc/config
+          cat << 'EOF' > files/etc/config/dropbear
+          config dropbear
+          option PasswordAuth 'on'
+          option RootPasswordAuth 'on'
+          option RootLogin '1'
+          option Port '22'
+          option Interface 'lan'
+          EOF
+
       - name: Cache OpenWrt downloads (dl)
         # IMPORTANT: must run AFTER "Clone iStoreOS", because the clone step
         # does `rm -rf istoreos` which would delete the restored dl dir.
