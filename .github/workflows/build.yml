@@ -70,9 +70,15 @@ jobs:
           #  YAML heredoc EOF at column 0 breaks the workflow file)
           printf 'src-git nas https://github.com/linkease/nas-packages.git;linkeasefull\nsrc-git nas_luci https://github.com/linkease/nas-packages-luci.git;main\n' >> feeds.conf.default
           
-          # 【新增】克隆 OpenClash 源码到 package 目录
+          # 1. 拉取 OpenClash 源码到 package 目录
           mkdir -p package/luci-app-openclash
           git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
+
+          # 2. 拉取 AdGuardHome 源码
+          git clone --depth=1 --filter=blob:none --sparse https://github.com/kenzok8/openwrt-packages.git package/kenzo-packages
+          cd package/kenzo-packages
+          git sparse-checkout set luci-app-adguardhome
+          cd ../..
           
           ./scripts/feeds update -a
           ./scripts/feeds install -a
