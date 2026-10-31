@@ -9,6 +9,10 @@ MARK=/etc/e87n/.net-defaults-applied
 
 # ---- IPv6 ----
 
+sed -i 's/^use-ipv6=.*/use-ipv6=no/' /etc/avahi/avahi-daemon.conf
+/etc/init.d/avahi-daemon restart
+
+# 1. 关闭 UCI 网络中的 IPv6 及相关分配
 uci set network.wan.ipv6='0'
 uci set network.globals.ula_prefix=''
 uci -q delete network.wan6
@@ -16,10 +20,27 @@ uci -q delete network.lan.ip6assign
 uci -q delete network.lan.ip6class
 uci commit network
 
+# 2. 关闭 DHCP 端的通告与服务，并强制过滤 AAAA 记录
 uci set dhcp.lan.ra='disabled'
 uci set dhcp.lan.dhcpv6='disabled'
 uci set dhcp.lan.ra_slaac='0'
 uci set dhcp.@dnsmasq[0].filter_aaaa='1'
 uci commit dhcp
+
+# 3. 写入内核底层彻底禁用 IPv6
+cat << 'EOF' > /etc/sysctl.d/disable-ipv6.conf
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOF
+sysctl -p /etc/sysctl.d/disable-ipv6.conf
+
+# 4. 停用并禁用 odhcpd 服务
+/etc/init.d/odhcpd stop
+/etc/init.d/odhcpd disable
+
+# 5. 重启网络和 DNS 服务使全部配置生效
+/etc/init.d/network restart
+/etc/init.d/dnsmasq restart
 
 exit 0
