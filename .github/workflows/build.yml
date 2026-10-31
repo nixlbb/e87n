@@ -310,7 +310,7 @@ jobs:
             build/istoreos/bin/targets/mediatek/filogic/*.itb
             build/istoreos/bin/targets/mediatek/filogic/*sysupgrade*
             build/istoreos/bin/targets/mediatek/filogic/packages
-            build/istoreos/bin/targets/mediatek/filogic/*.config
+            build/istoreos/bin/targets/mediatek/filogic/*config
           if-no-files-found: warn
           retention-days: 14
 
